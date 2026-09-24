@@ -20,20 +20,20 @@ Make sure **Docker Desktop** is installed and running.
 Clone the repository:
 
 ```bash
-git clone https://github.com/Iffat-A-Ansari/Infrashield.git
+git clone https://github.com/Iffat-A-Ansari/Infrashield-ROSP.git
 cd Infrashield
 ````
 
 Build the Docker image:
 
 ```bash
-docker build -t infrashield-main .
+docker build -t Infrashield-ROSP .
 ```
 
 Run the application:
 
 ```bash
-docker run --rm -p 5000:5000 infrashield-main
+docker run --rm -p 5000:5000 Infrashield-ROSP
 ```
 
 Open the application in your browser:
