@@ -67,8 +67,3 @@ The objective of Infrashield is to provide a unified solution for **infrastructu
 This project was developed for **academic and educational purposes**.
 
 ```
-
-This is ready to paste directly into your `README.md`.
-
-Available next action: :contentReference[oaicite:0]{index=0}
-```
