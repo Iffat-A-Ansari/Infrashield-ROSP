@@ -2,7 +2,7 @@ Absolutely. Here is the **concise final README** with only the sections you aske
 
 Copy-paste the entire block into `README.md`:
 
-````markdown
+
 # 🛡️ Infrashield
 
 **Infrashield** is an infrastructure security platform designed to help organizations monitor, detect, and assess security risks across their systems.
@@ -54,18 +54,6 @@ Then open:
 
 **[http://localhost:5001](http://localhost:5001)**
 
-## 📁 Project Structure
-
-```text
-Infrashield/
-├── app.py
-├── Dockerfile
-├── requirements.txt
-├── README.md
-├── templates/
-├── static/
-└── ...
-```
 
 ## 🎯 Objective
 
