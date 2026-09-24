@@ -58,8 +58,8 @@ The objective of Infrashield is to provide a unified solution for **infrastructu
 ## 👥 Team
 
 * **Iffat Anees Ansari** — Ideation, research gap identification, problem statement and feature finalization, implementation planning, Dashboard Implementation
-* **Ruhin Riyaj Inamdar** — Implementation planning, and network monitoring feature development and reporting the whole project.
 * **Khan Abu Osama** — 5W1H documentation, Literature survey and ML-based anomaly detection feature development.
+* **Ruhin Riyaj Inamdar** — Implementation planning, and network monitoring feature development and reporting the whole project.
 * **Alisha Salim Shaikh** — Literature survey, PPT planning, and OS compliance feature development.
 
 ## 📄 License
