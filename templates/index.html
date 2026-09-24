@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>InfraShield — OS Compliance</title>
+
+    <!--
+        Apply saved theme before page loads.
+        This prevents the page from flashing
+        into the wrong theme.
+    -->
+    <script>
+
+        (function () {
+
+            const savedTheme =
+                localStorage.getItem("infrashield-theme") || "dark";
+
+            document.documentElement.setAttribute(
+                "data-theme",
+                savedTheme
+            );
+
+        })();
+
+    </script>
+
+    <!-- Main stylesheet -->
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/navbar.css') }}">
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     NAVIGATION
+========================================================= -->
+
+<nav class="main-navigation">
+
+    <div class="nav-brand-group">
+        <a href="/" class="nav-brand">
+            <span class="brand-icon-shield">🛡️</span>
+            <span>InfraShield</span>
+        </a>
+        <span class="brand-tag">v2.4 Core</span>
+    </div>
+
+    <div class="nav-links">
+
+        <a href="/" class="nav-item">
+            <span>📊</span>
+            Dashboard
+        </a>
+
+        <a href="/compliance" class="nav-item active">
+            <span>🖥️</span>
+            OS Compliance
+        </a>
+
+        <a href="/network-policy" class="nav-item">
+            <span>🌐</span>
+            Network Policy
+        </a>
+
+        <a href="/anomaly-detection" class="nav-item">
+            <span>🧠</span>
+            Anomaly Detection
+        </a>
+
+    </div>
+
+    <div class="nav-right-controls">
+        <div class="live-beacon">
+            <span class="beacon-dot"></span>
+            <span>OS Compliance Active</span>
+        </div>
+
+        <button id="themeToggle" class="theme-toggle-btn" type="button" aria-label="Toggle Theme">
+            <span id="themeIcon">☀️</span>
+            <span id="themeText">Light</span>
+        </button>
+    </div>
+
+</nav>
+
+
+
+<!-- =========================================================
+     MAIN CONTAINER
+========================================================= -->
+
+<main class="dashboard-container">
+
+
+    <!-- =====================================================
+         HERO
+    ====================================================== -->
+
+    <section class="hero-dashboard">
+
+        <div class="hero-info-wrapper">
+
+            <div class="hero-eyebrow">
+                <span>🛡️</span>
+                <span>INFRASTRUCTURE SECURITY</span>
+            </div>
+
+            <div class="hero-title-row">
+                <h1 class="hero-title">OS Compliance Engine</h1>
+            </div>
+
+            <p class="hero-desc">
+                Monitor Linux security controls, identify configuration risks, and maintain system compliance.
+            </p>
+
+        </div>
+
+        <div class="hero-right-posture">
+            <div class="live-beacon">
+                <span class="beacon-dot"></span>
+                <span>System Scanner Ready</span>
+            </div>
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         COMPLIANCE SCORE
+    ====================================================== -->
+
+    <section class="score-section">
+
+
+        <div class="score-panel">
+
+
+            <div class="section-label">
+
+                OVERALL SECURITY POSTURE
+
+            </div>
+
+
+            <h2>
+
+                Compliance Score
+
+            </h2>
+
+
+            <p class="section-description">
+
+                Based on the latest security checks performed
+                on this Linux system.
+
+            </p>
+
+
+            <div class="score-wrapper">
+
+
+                <div class="score-ring
+                    {{ overall_status|lower|replace(' ', '-') }}">
+
+
+                    <div class="score-ring-inner">
+
+                        <span class="score-number">
+
+                            {{ score }}%
+
+                        </span>
+
+
+                        <span class="score-label">
+
+                            COMPLIANT
+
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="score-info">
+
+
+                    <div class="status-badge
+                        {{ overall_status|lower|replace(' ', '-') }}">
+
+                        {% if overall_status == "PASS" %}
+
+                            ✓ System Compliant
+
+                        {% elif overall_status == "WARNING" %}
+
+                            ⚠ Attention Required
+
+                        {% else %}
+
+                            ✕ Action Required
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <h3>
+
+                        {{ overall_status }}
+
+                    </h3>
+
+
+                    <p>
+
+                        Your system has completed
+                        the current compliance assessment.
+
+                    </p>
+
+
+                </div>
+
+
+            </div>
+
+
+            <!-- Progress -->
+
+            <div class="progress-container">
+
+
+                <div class="progress-header">
+
+                    <span>
+
+                        Compliance Progress
+
+                    </span>
+
+
+                    <strong>
+
+                        {{ score }}%
+
+                    </strong>
+
+                </div>
+
+
+                <div class="progress-track">
+
+                    <div class="progress-fill
+                        {{ overall_status|lower|replace(' ', '-') }}"
+                        style="width: {{ score }}%;">
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         SUMMARY
+    ====================================================== -->
+
+    <section class="summary-section">
+
+
+        <div class="section-header">
+
+
+            <div>
+
+                <div class="section-label">
+
+                    SECURITY OVERVIEW
+
+                </div>
+
+
+                <h2>
+
+                    Scan Summary
+
+                </h2>
+
+
+            </div>
+
+
+            <span class="section-chip">
+
+                {{ total }} Checks
+
+            </span>
+
+
+        </div>
+
+
+        <div class="summary-grid">
+
+
+            <!-- TOTAL -->
+
+            <div class="summary-card total-card">
+
+
+                <div class="summary-top">
+
+                    <div class="summary-icon">
+
+                        📋
+
+                    </div>
+
+
+                    <span class="summary-arrow">
+
+                        →
+
+                    </span>
+
+                </div>
+
+
+                <div class="summary-number">
+
+                    {{ total }}
+
+                </div>
+
+
+                <div class="summary-title">
+
+                    Total Checks
+
+                </div>
+
+
+                <div class="summary-description">
+
+                    Security controls evaluated
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- PASSED -->
+
+            <div class="summary-card passed-card">
+
+
+                <div class="summary-top">
+
+                    <div class="summary-icon">
+
+                        ✓
+
+                    </div>
+
+
+                    <span class="summary-state">
+
+                        SECURE
+
+                    </span>
+
+                </div>
+
+
+                <div class="summary-number">
+
+                    {{ passed }}
+
+                </div>
+
+
+                <div class="summary-title">
+
+                    Passed
+
+                </div>
+
+
+                <div class="summary-description">
+
+                    Controls meeting requirements
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- WARNINGS -->
+
+            <div class="summary-card warning-card">
+
+
+                <div class="summary-top">
+
+                    <div class="summary-icon">
+
+                        !
+
+                    </div>
+
+
+                    <span class="summary-state">
+
+                        REVIEW
+
+                    </span>
+
+                </div>
+
+
+                <div class="summary-number">
+
+                    {{ warnings }}
+
+                </div>
+
+
+                <div class="summary-title">
+
+                    Warnings
+
+                </div>
+
+
+                <div class="summary-description">
+
+                    Controls needing attention
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- FAILED -->
+
+            <div class="summary-card failed-card">
+
+
+                <div class="summary-top">
+
+                    <div class="summary-icon">
+
+                        ✕
+
+                    </div>
+
+
+                    <span class="summary-state">
+
+                        RISK
+
+                    </span>
+
+                </div>
+
+
+                <div class="summary-number">
+
+                    {{ failed }}
+
+                </div>
+
+
+                <div class="summary-title">
+
+                    Failed
+
+                </div>
+
+
+                <div class="summary-description">
+
+                    Controls requiring action
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         SECURITY CHECKS
+    ====================================================== -->
+
+    <section class="checks-section">
+
+
+        <div class="section-header">
+
+
+            <div>
+
+                <div class="section-label">
+
+                    LINUX SECURITY ANALYSIS
+
+                </div>
+
+
+                <h2>
+
+                    Security Checks
+
+                </h2>
+
+
+                <p>
+
+                    Detailed results from the latest
+                    compliance assessment.
+
+                </p>
+
+            </div>
+
+
+            <div class="check-count">
+
+                {{ total }} checks
+
+            </div>
+
+
+        </div>
+
+
+
+        <div class="checks-list">
+
+
+            {% for result in results %}
+
+
+            <div class="check-card">
+
+
+                <div class="check-left">
+
+
+                    <div class="check-status-icon
+                        {% if result.status == 'PASS' %}
+                            pass-icon
+                        {% elif result.status == 'WARNING' %}
+                            warning-icon
+                        {% else %}
+                            fail-icon
+                        {% endif %}">
+
+
+                        {% if result.status == "PASS" %}
+
+                            ✓
+
+                        {% elif result.status == "WARNING" %}
+
+                            !
+
+                        {% else %}
+
+                            ✕
+
+                        {% endif %}
+
+
+                    </div>
+
+
+                    <div class="check-info">
+
+
+                        <h3>
+
+                            {{ result.name }}
+
+                        </h3>
+
+
+                        <p>
+
+                            {{ result.details }}
+
+                        </p>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="check-right">
+
+
+                    <span class="badge
+                        {{ result.status|lower }}">
+
+                        {% if result.status == "PASS" %}
+
+                            ✓ PASS
+
+                        {% elif result.status == "WARNING" %}
+
+                            ⚠ WARNING
+
+                        {% else %}
+
+                            ✕ FAILED
+
+                        {% endif %}
+
+                    </span>
+
+
+                </div>
+
+
+            </div>
+
+
+            {% endfor %}
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         SECURITY TIPS
+    ====================================================== -->
+
+    <section class="security-banner">
+
+
+        <div class="security-banner-icon">
+
+            🔐
+
+        </div>
+
+
+        <div>
+
+            <h3>
+
+                Keep your infrastructure secure
+
+            </h3>
+
+
+            <p>
+
+                Regular compliance scans help identify
+                configuration weaknesses before they become
+                security incidents.
+
+            </p>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer>
+
+        <div>
+
+            <strong>
+
+                🛡️ InfraShield
+
+            </strong>
+
+            <span>
+
+                OS Compliance Engine
+
+            </span>
+
+        </div>
+
+
+        <div>
+
+            Linux Security & Infrastructure Protection
+
+        </div>
+
+    </footer>
+
+
+</main>
+
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+
+<script src="{{ url_for('static', filename='js/script.js') }}">
+</script>
+
+
+</body>
+
+</html>

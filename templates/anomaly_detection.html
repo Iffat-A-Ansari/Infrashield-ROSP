@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Infrashield — Anomaly Detection</title>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+    <!-- Anomaly Detection CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/anomaly_detection.css') }}">
+
+
+    <!-- =====================================================
+         THEME
+    ====================================================== -->
+
+    <script>
+
+        /*
+         * Apply saved theme before the page renders
+         * so there is no theme flash.
+         */
+
+        (function () {
+
+            const saved =
+                localStorage.getItem('infrashield-theme') || 'dark';
+
+            document.documentElement.setAttribute(
+                'data-theme',
+                saved
+            );
+
+        })();
+
+    </script>
+
+
+    <!-- =====================================================
+         NAVIGATION CSS
+    ====================================================== -->
+
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+</head>
+
+
+
+<body>
+
+
+    <!-- =====================================================
+         MAIN INFRASHIELD NAVIGATION
+    ====================================================== -->
+
+    <nav class="main-navigation">
+
+        <div class="nav-brand-group">
+            <a href="/" class="nav-brand">
+                <span class="brand-icon-shield">🛡️</span>
+                <span>InfraShield</span>
+            </a>
+            <span class="brand-tag">v2.4 Core</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="/" class="nav-item">
+                <span>📊</span>
+                Dashboard
+            </a>
+            <a href="/compliance" class="nav-item">
+                <span>🖥️</span>
+                OS Compliance
+            </a>
+            <a href="/network-policy" class="nav-item">
+                <span>🌐</span>
+                Network Policy
+            </a>
+            <a href="/anomaly-detection" class="nav-item active">
+                <span>🧠</span>
+                Anomaly Detection
+            </a>
+        </div>
+
+        <div class="nav-right-controls">
+            <div class="live-beacon">
+                <span class="beacon-dot" id="statusDot"></span>
+                <span>Anomaly Engine Active</span>
+            </div>
+
+            <button id="themeToggle" class="theme-toggle-btn" type="button" aria-label="Toggle Theme">
+                <span id="themeIcon">☀️</span>
+                <span id="themeText">Light</span>
+            </button>
+        </div>
+
+    </nav>
+
+    <main class="dashboard-container">
+
+    <!-- =====================================================
+         ORIGINAL ANOMALY DETECTION HEADER
+    ====================================================== -->
+
+    <section class="hero-dashboard">
+
+        <div class="hero-info-wrapper">
+            <div class="hero-eyebrow">
+                <span>🧠</span>
+                <span>AI ANOMALY ENGINE</span>
+            </div>
+
+            <div class="hero-title-row">
+                <h1 class="hero-title">Anomaly Detection</h1>
+            </div>
+
+            <p class="hero-desc">
+                ML-based (Isolation Forest) real-time system anomaly detection.
+            </p>
+        </div>
+
+        <div class="hero-right-posture">
+            <div class="live-beacon">
+                <span class="beacon-dot" id="statusDot"></span>
+                <span id="statusText">Loading status...</span>
+            </div>
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         STATUS BANNER
+    ====================================================== -->
+
+
+
+        <span id="statusText">
+
+            Loading status...
+
+        </span>
+
+
+    </div>
+
+
+
+    <!-- =====================================================
+         SYSTEM STATISTICS
+    ====================================================== -->
+
+    <div class="stats-row">
+
+
+        <!-- CPU -->
+
+        <div class="stat">
+
+            <div class="label">
+                CPU
+            </div>
+
+
+            <div class="value"
+                 id="cpuVal">
+
+                --%
+
+            </div>
+
+        </div>
+
+
+
+        <!-- MEMORY -->
+
+        <div class="stat">
+
+            <div class="label">
+                Memory
+            </div>
+
+
+            <div class="value"
+                 id="memVal">
+
+                --%
+
+            </div>
+
+        </div>
+
+
+
+        <!-- PROCESSES -->
+
+        <div class="stat">
+
+            <div class="label">
+                Processes
+            </div>
+
+
+            <div class="value"
+                 id="procVal">
+
+                --
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ANOMALIES -->
+
+        <div class="stat">
+
+            <div class="label">
+                Anomalies (recent)
+            </div>
+
+
+            <div class="value"
+                 id="anomCount"
+                 style="color:var(--danger)">
+
+                0
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =====================================================
+         MAIN GRID
+    ====================================================== -->
+
+    <div class="grid">
+
+
+        <!-- =================================================
+             LEFT COLUMN
+        ================================================== -->
+
+        <div>
+
+
+            <!-- CPU & MEMORY -->
+
+            <div class="panel"
+                 style="margin-bottom:20px;">
+
+
+                <h2>
+                    CPU &amp; Memory (%)
+                </h2>
+
+
+                <canvas id="cpuMemChart">
+                </canvas>
+
+
+            </div>
+
+
+
+            <!-- NETWORK -->
+
+            <div class="panel">
+
+
+                <h2>
+                    Network Throughput (bytes/sec)
+                </h2>
+
+
+                <canvas id="netChart">
+                </canvas>
+
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             RIGHT COLUMN
+        ================================================== -->
+
+        <div class="panel">
+
+
+            <h2>
+                Detected Anomalies
+            </h2>
+
+
+            <div class="anomaly-list"
+                 id="anomalyList">
+
+
+                <div class="empty">
+
+                    No anomalies detected yet.
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =====================================================
+         ORIGINAL JAVASCRIPT
+    ====================================================== -->
+
+    <script src="{{ url_for('static', filename='js/anomaly_detection.js') }}">
+    </script>
+
+
+    </main>
+</body>
+
+</html>

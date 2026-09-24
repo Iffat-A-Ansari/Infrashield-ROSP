@@ -1,0 +1,233 @@
+/* =========================================================
+   INFRASHIELD — SHARED TOP NAVIGATION
+   Load this stylesheet last so every page matches the dashboard.
+   ========================================================= */
+
+nav.main-navigation {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 12px 28px;
+    box-sizing: border-box;
+    background: rgba(17, 24, 39, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    border-radius: 0;
+    box-shadow: none;
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+html[data-theme="light"] nav.main-navigation,
+[data-theme="light"] nav.main-navigation,
+body[data-theme="light"] nav.main-navigation {
+    background: rgba(255, 255, 255, 0.88);
+}
+
+nav.main-navigation .nav-brand-group,
+nav.main-navigation .nav-right-controls {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+}
+
+nav.main-navigation .nav-brand-group {
+    justify-content: flex-start;
+    gap: 12px;
+}
+
+nav.main-navigation .nav-right-controls {
+    justify-content: flex-end;
+    gap: 14px;
+}
+
+nav.main-navigation .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+nav.main-navigation .brand-icon-shield {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    background: linear-gradient(135deg, var(--accent), #4338ca);
+    border-radius: 9px;
+    box-shadow: 0 4px 12px var(--accent-glow);
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+nav.main-navigation .brand-tag {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 7px;
+    background: var(--accent-soft);
+    color: var(--accent-light);
+    border-radius: 6px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+nav.main-navigation .nav-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+nav.main-navigation .nav-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm, 8px);
+    color: var(--text-secondary);
+    background: transparent;
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: none;
+    transition: all 0.2s ease;
+}
+
+nav.main-navigation .nav-item:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme="light"] nav.main-navigation .nav-item:hover,
+[data-theme="light"] nav.main-navigation .nav-item:hover,
+body[data-theme="light"] nav.main-navigation .nav-item:hover {
+    background: rgba(15, 23, 42, 0.05);
+}
+
+nav.main-navigation .nav-item.active {
+    color: var(--text);
+    background: var(--accent-soft);
+    border-color: rgba(99, 102, 241, 0.3);
+    font-weight: 600;
+}
+
+nav.main-navigation .live-beacon {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--success-soft);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--success);
+    white-space: nowrap;
+}
+
+nav.main-navigation .beacon-dot,
+nav.main-navigation .beacon-dot.ready {
+    width: 8px;
+    height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--success);
+    animation: beaconPulse 2s infinite;
+    flex-shrink: 0;
+}
+
+nav.main-navigation .nav-item span,
+nav.main-navigation .nav-brand span,
+nav.main-navigation .live-beacon span,
+nav.main-navigation .theme-toggle-btn span {
+    display: inline;
+}
+
+nav.main-navigation #themeToggle.theme-toggle-btn,
+nav.main-navigation .theme-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 13px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: var(--radius-sm, 8px);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: none;
+    transform: none;
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+}
+
+nav.main-navigation #themeToggle.theme-toggle-btn:hover,
+nav.main-navigation .theme-toggle-btn:hover {
+    background: var(--panel-hover);
+    border-color: var(--text-secondary);
+    transform: none;
+}
+
+@media (max-width: 1100px) {
+    nav.main-navigation .live-beacon span:last-child {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    nav.main-navigation {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 12px 18px;
+    }
+
+    nav.main-navigation .nav-brand-group,
+    nav.main-navigation .nav-right-controls,
+    nav.main-navigation .nav-links {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+
+    nav.main-navigation .nav-links {
+        justify-content: flex-start;
+        overflow-x: visible;
+        flex-wrap: wrap;
+        padding-bottom: 0;
+    }
+
+    nav.main-navigation .nav-right-controls {
+        justify-content: space-between;
+    }
+
+    nav.main-navigation .live-beacon span:last-child {
+        display: inline;
+    }
+}

@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>InfraShield | Network Policy Scanner</title>
+
+    <!-- Prevent Theme Flash -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem("infrashield-theme") || "dark";
+            document.documentElement.setAttribute("data-theme", savedTheme);
+            document.documentElement.style.colorScheme = savedTheme;
+        })();
+    </script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Network Policy CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/network_policy.css') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/navbar.css') }}">
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         MAIN INFRASHIELD NAVIGATION
+    ====================================================== -->
+
+    <nav class="main-navigation">
+
+        <div class="nav-brand-group">
+            <a href="/" class="nav-brand">
+                <span class="brand-icon-shield">🛡️</span>
+                <span>InfraShield</span>
+            </a>
+            <span class="brand-tag">v2.4 Core</span>
+        </div>
+
+
+        <div class="nav-links">
+
+            <a href="/" class="nav-item">
+                <span>📊</span> Dashboard
+            </a>
+
+            <a href="/compliance" class="nav-item">
+                <span>🖥️</span> OS Compliance
+            </a>
+
+            <a href="/network-policy" class="nav-item active">
+                <span>🌐</span> Network Policy
+            </a>
+
+            <a href="/anomaly-detection" class="nav-item">
+                <span>🧠</span> Anomaly Detection
+            </a>
+
+        </div>
+
+        <div class="nav-right-controls">
+            <div class="live-beacon">
+                <span class="beacon-dot"></span>
+                <span>Network Scanner Active</span>
+            </div>
+
+            <button id="themeToggle" class="theme-toggle-btn" type="button" aria-label="Toggle Theme">
+                <span id="themeIcon">☀️</span>
+                <span id="themeText">Light</span>
+            </button>
+        </div>
+
+    </nav>
+
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="dashboard-container">
+
+
+        <!-- =================================================
+             TOP HEADER
+        ================================================== -->
+
+        <header class="hero-dashboard">
+
+            <div class="hero-info-wrapper">
+                <div class="hero-eyebrow">
+                    <span>🌐</span>
+                    <span>SECURITY / NETWORK</span>
+                </div>
+
+                <div class="hero-title-row">
+                    <h1 class="hero-title">Network Policy Scanner</h1>
+                </div>
+
+                <p class="hero-desc">
+                    Monitor active connections, listening ports and firewall policies.
+                </p>
+            </div>
+
+            <div class="hero-right-posture">
+                <div class="live-beacon">
+                    <span class="beacon-dot"></span>
+                    <span>Last Scan: <strong id="lastScan">Not scanned yet</strong></span>
+                </div>
+            </div>
+
+        </header>
+
+
+
+        <!-- =================================================
+             SECURITY OVERVIEW
+        ================================================== -->
+
+        <section class="overview-grid">
+
+
+            <!-- Security Score -->
+
+            <div class="card score-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <span class="card-label">
+                            SECURITY SCORE
+                        </span>
+
+
+                        <h3>
+                            Overall Protection
+                        </h3>
+
+                    </div>
+
+
+                    <span class="card-icon">
+                        ◉
+                    </span>
+
+                </div>
+
+
+                <div class="score-content">
+
+                    <div class="score-ring"
+                         id="scoreRing">
+
+                        <div class="score-inner">
+
+                            <strong id="securityScore">
+                                --
+                            </strong>
+
+
+                            <span>
+                                /100
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="score-info">
+
+                        <div class="risk-badge"
+                             id="riskBadge">
+
+                            NOT SCANNED
+
+                        </div>
+
+
+                        <p id="scoreDescription">
+
+                            Run a network scan to evaluate
+                            your current security posture.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Firewall -->
+
+            <div class="card status-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <span class="card-label">
+                            FIREWALL
+                        </span>
+
+
+                        <h3>
+                            Firewall Protection
+                        </h3>
+
+                    </div>
+
+
+                    <span class="card-icon">
+                        ◈
+                    </span>
+
+                </div>
+
+
+                <div class="status-main">
+
+                    <div class="large-status-icon"
+                         id="firewallIcon">
+
+                        —
+
+                    </div>
+
+
+                    <div>
+
+                        <strong id="firewallStatus">
+                            Not Checked
+                        </strong>
+
+
+                        <p id="firewallType">
+                            Run a scan to check firewall status.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-footer">
+
+                    <span>
+                        Rules Detected
+                    </span>
+
+
+                    <strong id="firewallRules">
+                        --
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Active Connections -->
+
+            <div class="card stat-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <span class="card-label">
+                            NETWORK ACTIVITY
+                        </span>
+
+
+                        <h3>
+                            Active Connections
+                        </h3>
+
+                    </div>
+
+
+                    <span class="card-icon">
+                        ⌁
+                    </span>
+
+                </div>
+
+
+                <div class="big-number"
+                     id="activeConnections">
+
+                    --
+
+                </div>
+
+
+                <p class="stat-description">
+
+                    Currently detected network connections
+
+                </p>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             NETWORK STATISTICS
+        ================================================== -->
+
+        <section class="section">
+
+            <div class="section-title">
+
+                <div>
+
+                    <span class="section-label">
+                        NETWORK ANALYSIS
+                    </span>
+
+
+                    <h2>
+                        Policy Statistics
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="stats-grid">
+
+
+                <!-- Listening Ports -->
+
+                <div class="stat-box">
+
+                    <div class="stat-box-icon">
+                        ◉
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Listening Ports
+                        </span>
+
+
+                        <strong id="listeningPorts">
+                            --
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- High Risk -->
+
+                <div class="stat-box danger">
+
+                    <div class="stat-box-icon">
+                        !
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            High Risk Ports
+                        </span>
+
+
+                        <strong id="highRiskPorts">
+                            --
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Unauthorized -->
+
+                <div class="stat-box warning">
+
+                    <div class="stat-box-icon">
+                        ×
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Unauthorized
+                        </span>
+
+
+                        <strong id="unauthorizedPorts">
+                            --
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Review -->
+
+                <div class="stat-box review">
+
+                    <div class="stat-box-icon">
+                        ?
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Review Required
+                        </span>
+
+
+                        <strong id="reviewPorts">
+                            --
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             CHARTS
+        ================================================== -->
+
+        <section class="charts-grid">
+
+
+            <!-- Risk Distribution -->
+
+            <div class="card chart-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <span class="card-label">
+                            RISK ANALYSIS
+                        </span>
+
+
+                        <h3>
+                            Risk Distribution
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div class="chart-container">
+
+                    <canvas id="riskChart">
+                    </canvas>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Port Status -->
+
+            <div class="card chart-card">
+
+                <div class="card-header">
+
+                    <div>
+
+                        <span class="card-label">
+                            POLICY STATUS
+                        </span>
+
+
+                        <h3>
+                            Port Policy Status
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div class="chart-container">
+
+                    <canvas id="statusChart">
+                    </canvas>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             PORT POLICY TABLE
+        ================================================== -->
+
+        <section class="card policy-card">
+
+            <div class="card-header policy-header">
+
+                <div>
+
+                    <span class="card-label">
+                        FIREWALL & CONNECTION ANALYSIS
+                    </span>
+
+
+                    <h3>
+                        Port Policy Evaluation
+                    </h3>
+
+                </div>
+
+
+                <div class="table-count">
+
+                    <span id="policyCount">
+                        0
+                    </span>
+
+                    Ports
+
+                </div>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Port
+                            </th>
+
+                            <th>
+                                Process
+                            </th>
+
+                            <th>
+                                Local Address
+                            </th>
+
+                            <th>
+                                Firewall
+                            </th>
+
+                            <th>
+                                Risk
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="policyTableBody">
+
+                        <tr>
+
+                            <td colspan="6"
+                                class="empty-state">
+
+                                <div class="empty-icon">
+                                    ◌
+                                </div>
+
+
+                                <strong>
+                                    No scan data available
+                                </strong>
+
+
+                                <span>
+                                    Click "Scan Network"
+                                    to analyze active ports.
+                                </span>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             SECURITY RECOMMENDATIONS
+        ================================================== -->
+
+        <section class="card recommendations-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <span class="card-label">
+                        SECURITY INSIGHTS
+                    </span>
+
+
+                    <h3>
+                        Security Recommendations
+                    </h3>
+
+                </div>
+
+
+                <span class="recommendation-count"
+                      id="recommendationCount">
+
+                    0
+
+                </span>
+
+            </div>
+
+
+            <div id="recommendationsList"
+                 class="recommendations-list">
+
+                <div class="empty-recommendations">
+
+                    <div class="empty-icon">
+                        ✓
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            No recommendations yet
+                        </strong>
+
+
+                        <p>
+                            Run a network scan to generate
+                            security recommendations.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             SCAN INFORMATION
+        ================================================== -->
+
+        <section class="info-grid">
+
+
+            <div class="info-item">
+
+                <span class="info-label">
+                    OPERATING SYSTEM
+                </span>
+
+
+                <strong id="operatingSystem">
+                    --
+                </strong>
+
+            </div>
+
+
+
+            <div class="info-item">
+
+                <span class="info-label">
+                    FIREWALL TYPE
+                </span>
+
+
+                <strong id="firewallInfo">
+                    --
+                </strong>
+
+            </div>
+
+
+
+            <div class="info-item">
+
+                <span class="info-label">
+                    FIREWALL RULES
+                </span>
+
+
+                <strong id="firewallRuleInfo">
+                    --
+                </strong>
+
+            </div>
+
+
+
+            <div class="info-item">
+
+                <span class="info-label">
+                    SCANNER STATUS
+                </span>
+
+
+                <strong id="scannerStatus">
+                    READY
+                </strong>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             FOOTER
+        ================================================== -->
+
+        <footer class="footer">
+
+            <span>
+                InfraShield Infrastructure Security Platform
+            </span>
+
+
+            <span>
+                Network Policy Scanner
+            </span>
+
+        </footer>
+
+
+    </main>
+
+
+
+    <!-- =====================================================
+         NETWORK POLICY JAVASCRIPT
+    ====================================================== -->
+
+    <script src="{{ url_for('static', filename='js/network_policy.js') }}">
+    </script>
+
+
+</body>
+
+</html>

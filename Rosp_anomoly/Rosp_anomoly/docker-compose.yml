@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  anomaly-detector:
+    build: .
+    container_name: infrashield-anomaly-detector
+    # network_mode: host use kar rahe hain isliye 'ports' ki zaroorat nahi --
+    # app seedha host ke port 5000 par milega.
+    # Host machine ko monitor karne ke liye (na ki container ko), ye do
+    # settings zaroori hain -- warna psutil sirf container ke apne resource
+    # usage ko dekhega, host ke nahi.
+    pid: "host"
+    network_mode: "host"
+    volumes:
+      - anomaly_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  anomaly_data:

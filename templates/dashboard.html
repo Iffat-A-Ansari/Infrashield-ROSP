@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfraShield — Executive Security Dashboard</title>
+
+    <!-- Prevent Theme Flash -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem("infrashield-theme") || "dark";
+            document.documentElement.setAttribute("data-theme", savedTheme);
+        })();
+    </script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Main & Dashboard Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+</head>
+
+<body>
+
+    <!-- =========================================================
+         TOP NAVIGATION
+         ========================================================= -->
+    <nav class="main-navigation">
+        <div class="nav-brand-group">
+            <a href="/" class="nav-brand">
+                <span class="brand-icon-shield">🛡️</span>
+                <span>InfraShield</span>
+            </a>
+            <span class="brand-tag">v2.4 Core</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="/" class="nav-item active">
+                <span>📊</span>
+                Dashboard
+            </a>
+            <a href="/compliance" class="nav-item">
+                <span>🖥️</span>
+                OS Compliance
+            </a>
+            <a href="/network-policy" class="nav-item">
+                <span>🌐</span>
+                Network Policy
+            </a>
+            <a href="/anomaly-detection" class="nav-item">
+                <span>🧠</span>
+                Anomaly Detection
+            </a>
+        </div>
+
+        <div class="nav-right-controls">
+            <div class="live-beacon">
+                <span class="beacon-dot"></span>
+                <span>System Monitored</span>
+            </div>
+
+            <button id="themeToggle" class="theme-toggle-btn" type="button" aria-label="Toggle Theme">
+                <span id="themeIcon">☀️</span>
+                <span id="themeText">Light</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- =========================================================
+         MAIN DASHBOARD CONTAINER
+         ========================================================= -->
+    <main class="dashboard-container">
+
+        <!-- =====================================================
+             HERO: EXECUTIVE POSTURE BAR
+             ===================================================== -->
+        <section class="hero-dashboard">
+            <div class="hero-info-wrapper">
+                <div class="hero-eyebrow">
+                    <span>🛡️</span>
+                    <span>Unified Infrastructure Defense</span>
+                </div>
+
+                <div class="hero-title-row">
+                    <h1 class="hero-title">Executive Security Dashboard</h1>
+                </div>
+
+                <p class="hero-desc">
+                    Comprehensive command center aggregating Linux operating system compliance benchmarks,
+                    real-time network exposure policies, host resource vitals, and ML-based behavioral anomaly intelligence.
+                </p>
+
+                <div class="meta-chips-row">
+                    <div class="meta-chip">
+                        <span>💻 Host:</span>
+                        <strong id="metaHostname">{{ vitals.hostname }}</strong>
+                    </div>
+                    <div class="meta-chip">
+                        <span>🐧 OS:</span>
+                        <strong id="metaPlatform">{{ vitals.system }} {{ vitals.release }}</strong>
+                    </div>
+                    <div class="meta-chip">
+                        <span>⚙️ Arch:</span>
+                        <strong id="metaArch">{{ vitals.machine }}</strong>
+                    </div>
+                    <div class="meta-chip">
+                        <span>⏱️ Uptime:</span>
+                        <strong id="metaUptime">{{ vitals.uptime }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-right-posture">
+                <div class="posture-score-box">
+                    <div class="posture-dial">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="dial-bg" cx="50" cy="50" r="38"></circle>
+                            <circle id="postureDialProgress" class="dial-progress" cx="50" cy="50" r="38"
+                                    stroke="var(--success)"
+                                    style="stroke-dasharray: 238.76 238.76; stroke-dashoffset: 20;"></circle>
+                        </svg>
+                        <span id="postureDialText" class="dial-text">{{ posture.master_score }}%</span>
+                    </div>
+                    <span id="postureBadge" class="posture-badge {{ posture.posture_class }}">{{ posture.posture_badge }}</span>
+                </div>
+
+                <div class="hero-actions">
+                    <button id="runFullAuditBtn" class="btn-primary" type="button">
+                        <span>⚡</span> Run Full Audit
+                    </button>
+                    <button id="quickSyncBtn" class="btn-secondary" type="button">
+                        <span>🔄</span> Quick Sync
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- =====================================================
+             TOP KPI METRICS GRID
+             ===================================================== -->
+        <section class="kpi-grid">
+
+            <!-- Card 1: OS Compliance -->
+            <div class="kpi-card kpi-compliance">
+                <div class="kpi-top">
+                    <span class="kpi-label">OS Compliance</span>
+                    <div class="kpi-icon-box">🖥️</div>
+                </div>
+                <div>
+                    <div class="kpi-main-val-row">
+                        <span id="kpiCompVal" class="kpi-val">{{ compliance.score }}%</span>
+                        <span id="kpiCompTag" class="kpi-tag {{ 'pass' if compliance.score >= 80 else 'warning' if compliance.score >= 50 else 'fail' }}">
+                            {{ compliance.overall_status }}
+                        </span>
+                    </div>
+                    <div class="kpi-progress-bar">
+                        <div id="kpiCompProgress" class="kpi-progress-fill"
+                             style="width: {{ compliance.score }}%; background: {{ 'var(--success)' if compliance.score >= 80 else 'var(--warning)' if compliance.score >= 50 else 'var(--danger)' }};"></div>
+                    </div>
+                </div>
+                <div class="kpi-details-list">
+                    <div class="kpi-detail-item">
+                        <span>Passed Controls:</span>
+                        <strong id="kpiCompPassed">{{ compliance.passed }} / {{ compliance.total }}</strong>
+                    </div>
+                    <div class="kpi-detail-item">
+                        <span>Warnings:</span>
+                        <strong id="kpiCompWarn">{{ compliance.warnings }}</strong>
+                    </div>
+                    <div class="kpi-detail-item">
+                        <span>Failures:</span>
+                        <strong id="kpiCompFail">{{ compliance.failed }}</strong>
+                    </div>
+                </div>
+                <a href="/compliance" class="kpi-bottom-link">
+                    <span>Inspect Compliance Controls</span>
+                    <span>→</span>
+                </a>
+            </div>
+
+            <!-- Card 2: Network Exposure -->
+            <div class="kpi-card kpi-network">
+                <div class="kpi-top">
+                    <span class="kpi-label">Network Defense</span>
+                    <div class="kpi-icon-box">🌐</div>
+                </div>
+                <div>
+                    <div class="kpi-main-val-row">
+                        <span id="kpiNetVal" class="kpi-val">{{ network.summary.listening_ports if network.summary else 0 }} Ports</span>
+                        <span id="kpiNetTag" class="kpi-tag {{ 'pass' if (network.summary.risk_level if network.summary else 'LOW') == 'LOW' else 'warning' }}">
+                            Risk: {{ network.summary.risk_level if network.summary else 'LOW' }}
+                        </span>
+                    </div>
+                    <div class="kpi-progress-bar">
+                        <div class="kpi-progress-fill" style="width: {{ network.summary.network_score if network.summary else 75 }}%; background: var(--cyan);"></div>
+                    </div>
+                </div>
+                <div class="kpi-details-list">
+                    <div class="kpi-detail-item">
+                        <span>Active Sockets:</span>
+                        <strong id="kpiNetActive">{{ network.summary.active_connections if network.summary else 0 }}</strong>
+                    </div>
+                    <div class="kpi-detail-item">
+                        <span>Listening Ports:</span>
+                        <strong id="kpiNetListening">{{ network.summary.listening_ports if network.summary else 0 }}</strong>
+                    </div>
+                    <div class="kpi-detail-item">
+                        <span>High-Risk Ports:</span>
+                        <strong id="kpiNetRisk">{{ network.summary.high_risk_ports if network.summary else 0 }}</strong>
+                    </div>
+                    <div class="kpi-detail-item">
+                        <span>Firewall Enforced:</span>
+                        <strong id="kpiNetFirewall" style="color: {{ 'var(--success)' if network.firewall and network.firewall.enabled else 'var(--danger)' }};">
+                            {{ 'Active' if network.firewall and network.firewall.enabled else 'Disabled' }}
+                        </strong>
+                    </div>
+                </div>
+                <a href="/network-policy" class="kpi-bottom-link">
+                    <span>Audit Network Policies</span>
+                    <span>→</span>
+                </a>
+            </div>
+
+            <!-- Card 3: AI Anomaly Detection -->
+            <div class="kpi-card kpi-anomaly">
+                <div class="kpi-top">
+                    <span class="kpi-label">AI Anomaly Engine</span>
+                    <div class="kpi-icon-box">🧠</div>
+                </div>
+                <div>
+                    <div class="kpi-main-val-row">
+                        <span id="kpiAnomVal" class="kpi-val">{{ 'Model Active' if anomaly_status.baseline_ready else 'Calibrating' }}</span>
+                        <span id="kpiAnomTag" class="kpi-tag {{ 'pass' if anomaly_status.baseline_ready else 'info' }}">
+                            {{ 'Trained' if anomaly_status.baseline_ready else 'Baseline Prep' }}
+                        </span>
+                    </div>
+                    <div class="kpi-progress-bar">
+                        <div id="kpiAnomProgress" class="kpi-progress-fill"
+                             style="width: {{ anomaly_status.baseline_pct }}%; background: {{ 'var(--success)' if anomaly_status.baseline_ready else 'var(--accent)' }};"></div>
+                    </div>
+                </div>
+                <div class="kpi-details-list">
+                    <div class="kpi-detail-item">
+                        <span>Telemetry Samples:</span>
+                        <strong id="kpiAnomSamples">{{ anomaly_status.total_samples }} / {{ anomaly_status.baseline_needed }}</strong>
+                    </div>
+                    <div class="kpi-detail-item">
+                        <span>Recent Anomalies:</span>
+                        <strong id="kpiAnomCount">{{ recent_anomalies|length }}</strong>
+                    </div>
+                    <div class="kpi-detail-item">
+                        <span>Isolation Forest Contam:</span>
+                        <strong>5% (0.05)</strong>
+                    </div>
+                </div>
+                <a href="/anomaly-detection" class="kpi-bottom-link">
+                    <span>Launch Anomaly Monitor</span>
+                    <span>→</span>
+                </a>
+            </div>
+
+            <!-- Card 4: Host Vital Signs -->
+            <div class="kpi-card kpi-system">
+                <div class="kpi-top">
+                    <span class="kpi-label">Host Vital Signs</span>
+                    <div class="kpi-icon-box">⚡</div>
+                </div>
+                <div>
+                    <div class="kpi-main-val-row">
+                        <span id="kpiSysVal" class="kpi-val">CPU {{ vitals.cpu_percent }}%</span>
+                        <span class="kpi-tag info">Live Sensor</span>
+                    </div>
+                    <div class="kpi-progress-bar">
+                        <div class="kpi-progress-fill" style="width: {{ vitals.cpu_percent }}%; background: var(--purple);"></div>
+                    </div>
+                </div>
+                <div class="kpi-details-list">
+                    <div class="kpi-detail-item">
+                        <span>CPU Load:</span>
+                        <strong id="kpiSysCpu">{{ vitals.cpu_percent }}%</strong>
+                    </div>
+                    <div class="kpi-detail-item">
+                        <span>RAM Utilization:</span>
+                        <strong id="kpiSysMem">{{ vitals.mem_percent }}% ({{ vitals.mem_used_gb }}G/{{ vitals.mem_total_gb }}G)</strong>
+                    </div>
+                    <div class="kpi-detail-item">
+                        <span>Root Disk (/):</span>
+                        <strong id="kpiSysDisk">{{ vitals.disk_percent }}%</strong>
+                    </div>
+                    <div class="kpi-detail-item">
+                        <span>Active Processes:</span>
+                        <strong id="kpiSysProc">{{ vitals.process_count }} tasks</strong>
+                    </div>
+                </div>
+                <a href="/anomaly-detection" class="kpi-bottom-link">
+                    <span>View Stream Metrics</span>
+                    <span>→</span>
+                </a>
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             ANALYTICS & CHARTS SECTION
+             ===================================================== -->
+        <section class="analytics-grid">
+
+            <!-- Chart 1: Real-time Telemetry Stream -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title-group">
+                        <div class="chart-title">
+                            <span>📈</span>
+                            <span>Real-Time System Telemetry Stream</span>
+                        </div>
+                        <span class="chart-subtitle">Continuous multi-metric monitoring of CPU & Memory trends</span>
+                    </div>
+
+                    <div class="chart-controls">
+                        <label for="autoRefreshSelect" style="font-size: 11px; color: var(--text-muted);">Sync:</label>
+                        <select id="autoRefreshSelect" class="refresh-select">
+                            <option value="5000">Every 5s (Live)</option>
+                            <option value="10000" selected>Every 10s</option>
+                            <option value="30000">Every 30s</option>
+                            <option value="0">Manual Only</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="chart-canvas-wrapper">
+                    <canvas id="telemetryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Side Charts Stack -->
+            <div class="side-charts-stack">
+
+                <!-- Posture Breakdown -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title-group">
+                            <div class="chart-title">
+                                <span>🛡️</span>
+                                <span>Security Factor Distribution</span>
+                            </div>
+                            <span class="chart-subtitle">Weighted sub-scores across defense vectors</span>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrapper" style="min-height: 180px; max-height: 190px;">
+                        <canvas id="postureChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Network Port Breakdown -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title-group">
+                            <div class="chart-title">
+                                <span>🌐</span>
+                                <span>Port Exposure Profile</span>
+                            </div>
+                            <span class="chart-subtitle">Authorized vs other active ports</span>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrapper" style="min-height: 180px; max-height: 190px;">
+                        <canvas id="portChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             INCIDENT & SECURITY ALERTS FEED
+             ===================================================== -->
+        <section class="alerts-section">
+            <div class="section-head-bar">
+                <div class="section-title">
+                    <span>🚨</span>
+                    <span>Active Security Alerts & Policy Events</span>
+                </div>
+
+                <div class="alert-filters">
+                    <button class="filter-btn active" data-filter="all">All (<span id="countAllAlerts">{{ alerts|length }}</span>)</button>
+                    <button class="filter-btn" data-filter="critical">Critical (<span id="countCritAlerts">0</span>)</button>
+                    <button class="filter-btn" data-filter="warning">Warnings (<span id="countWarnAlerts">0</span>)</button>
+                    <button class="filter-btn" data-filter="secure">Operational</button>
+                </div>
+            </div>
+
+            <div id="alertsFeedContainer" class="alerts-feed-wrapper">
+                {% for alert in alerts %}
+                <div class="alert-item {{ 'severity-critical' if alert.severity == 'CRITICAL' else 'severity-warning' if alert.severity == 'WARNING' else 'severity-secure' }}">
+                    <div class="alert-left-content">
+                        <div class="alert-icon-pill">
+                            {% if alert.severity == 'CRITICAL' %}✕{% elif alert.severity == 'WARNING' %}!{% else %}✓{% endif %}
+                        </div>
+                        <div class="alert-body">
+                            <div class="alert-headline-row">
+                                <span class="alert-title">{{ alert.title }}</span>
+                                <span class="alert-source-tag">{{ alert.source }}</span>
+                            </div>
+                            <p class="alert-details">{{ alert.details }}</p>
+                        </div>
+                    </div>
+                    <div class="alert-right-actions">
+                        <span class="alert-timestamp">{{ alert.time }}</span>
+                        {% if alert.link and alert.link != '#' %}
+                        <a href="{{ alert.link }}" class="alert-inspect-btn">Investigate →</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- =====================================================
+             SUBSYSTEM MODULES COMMAND CENTER
+             ===================================================== -->
+        <section class="subsystems-grid">
+
+            <!-- Subsystem 1: OS Compliance -->
+            <div class="subsystem-card">
+                <div class="subsystem-header">
+                    <div class="subsystem-icon">🖥️</div>
+                    <div class="subsystem-title-group">
+                        <h3>OS Compliance Engine</h3>
+                        <p>Linux security & access controls</p>
+                    </div>
+                </div>
+                <div id="subsystemCompList" class="subsystem-body-list">
+                    {% for check in compliance.results %}
+                    <div class="subsystem-row">
+                        <span>{{ check.name }}</span>
+                        <span class="subsystem-badge {{ 'pass' if check.status == 'PASS' else 'warning' if check.status == 'WARNING' else 'fail' }}">
+                            {{ check.status }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <a href="/compliance" class="btn-secondary">Open Compliance Engine →</a>
+            </div>
+
+            <!-- Subsystem 2: Network Policy -->
+            <div class="subsystem-card">
+                <div class="subsystem-header">
+                    <div class="subsystem-icon">🌐</div>
+                    <div class="subsystem-title-group">
+                        <h3>Network Policy Scanner</h3>
+                        <p>Connection & firewall enforcement</p>
+                    </div>
+                </div>
+                <div id="subsystemNetList" class="subsystem-body-list">
+                    <div class="subsystem-row">
+                        <span>Firewall Status ({{ network.firewall.type if network.firewall else 'Host' }})</span>
+                        <span class="subsystem-badge {{ 'pass' if network.firewall and network.firewall.enabled else 'fail' }}">
+                            {{ 'Enabled' if network.firewall and network.firewall.enabled else 'Disabled' }}
+                        </span>
+                    </div>
+                    <div class="subsystem-row">
+                        <span>Listening Ports</span>
+                        <strong>{{ network.summary.listening_ports if network.summary else 0 }}</strong>
+                    </div>
+                    <div class="subsystem-row">
+                        <span>High-Risk Ports</span>
+                        <span class="subsystem-badge {{ 'fail' if network.summary and network.summary.high_risk_ports > 0 else 'pass' }}">
+                            {{ network.summary.high_risk_ports if network.summary else 0 }} detected
+                        </span>
+                    </div>
+                    <div class="subsystem-row">
+                        <span>Active Sockets</span>
+                        <strong>{{ network.summary.active_connections if network.summary else 0 }}</strong>
+                    </div>
+                </div>
+                <a href="/network-policy" class="btn-secondary">Launch Network Scanner →</a>
+            </div>
+
+            <!-- Subsystem 3: Anomaly Detection -->
+            <div class="subsystem-card">
+                <div class="subsystem-header">
+                    <div class="subsystem-icon">🧠</div>
+                    <div class="subsystem-title-group">
+                        <h3>AI Anomaly Detection</h3>
+                        <p>Unsupervised Isolation Forest</p>
+                    </div>
+                </div>
+                <div id="subsystemAnomList" class="subsystem-body-list">
+                    <div class="subsystem-row">
+                        <span>Algorithm</span>
+                        <strong>Isolation Forest</strong>
+                    </div>
+                    <div class="subsystem-row">
+                        <span>Contamination Factor</span>
+                        <strong>5% (0.05)</strong>
+                    </div>
+                    <div class="subsystem-row">
+                        <span>Model Status</span>
+                        <span class="subsystem-badge {{ 'pass' if anomaly_status.baseline_ready else 'warning' }}">
+                            {{ 'Active' if anomaly_status.baseline_ready else 'Training' }}
+                        </span>
+                    </div>
+                    <div class="subsystem-row">
+                        <span>Telemetry Samples</span>
+                        <strong>{{ anomaly_status.total_samples }} collected</strong>
+                    </div>
+                </div>
+                <a href="/anomaly-detection" class="btn-secondary">Launch Anomaly Monitor →</a>
+            </div>
+
+        </section>
+
+        <!-- =====================================================
+             FOOTER
+             ===================================================== -->
+        <footer class="dashboard-footer">
+            <div class="footer-brand">
+                <span>🛡️</span>
+                <span>InfraShield Platform — SecOps Infrastructure Protection</span>
+            </div>
+            <div>
+                <span>Telemetry: Live | Anomaly Engine: Isolation Forest | Host: {{ vitals.hostname }}</span>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Initial Data for instant zero-latency hydration -->
+    <script>
+        window.INITIAL_DASHBOARD_DATA = {
+            vitals: {{ vitals|tojson }},
+            compliance: {{ compliance|tojson }},
+            network: {{ network|tojson }},
+            anomaly_status: {{ anomaly_status|tojson }},
+            recent_anomalies: {{ recent_anomalies|tojson }},
+            recent_metrics: {{ recent_metrics|tojson }},
+            posture: {{ posture|tojson }},
+            alerts: {{ alerts|tojson }}
+        };
+    </script>
+
+    <!-- Dashboard Controller -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+</body>
+</html>
