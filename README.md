@@ -43,7 +43,7 @@ Open the application in your browser:
 If port `5000` is already in use, run:
 
 ```bash
-docker run --rm -p 5001:5000 infrashield-main
+docker run --rm -p 5001:5000 Infrashield-ROSP
 ```
 
 Then open:
